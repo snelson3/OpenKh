@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using OpenKh.Engine.Parsers;
 using OpenKh.Engine;
 using System.Numerics;
+using OpenKh.Recom;
 
 namespace OpenKh.Game.Entities
 {
@@ -69,8 +70,10 @@ namespace OpenKh.Game.Entities
             var modelName = $"obj/{objEntry.ModelName}.mdlx";
             using var stream = Kernel.DataContent.FileOpen(modelName);
             var entries = Bar.Read(stream);
-            _model = entries.ForEntry(x => x.Type == Bar.EntryType.Model, Mdlx.Read);
-            Model = MeshLoader.FromKH2(_model);
+            //_model = entries.ForEntry(x => x.Type == Bar.EntryType.Model, Mdlx.Read);
+            //Model = MeshLoader.FromKH2(_model);
+
+            (Model, Textures) = ComMeshLoader(graphics, @"D:\Hacking\KHReCoM\models\ps4_stripped\PL0001");
 
             var texture = entries.ForEntry("tim_", Bar.EntryType.ModelTexture, ModelTexture.Read);
             Textures = texture.LoadTextures(graphics).ToArray();
@@ -151,6 +154,17 @@ namespace OpenKh.Game.Entities
                     return new PngKingdomTexture(path, graphics);
                 }).ToArray(),
             };
+        }
+
+        public static (IModelMotion, IKingdomTexture[]) ComMeshLoader(GraphicsDevice graphics, string filePath)
+        {
+            var mdlFilename = $"{filePath}.MDL";
+            var texFilename = $"{filePath}.RTM";
+
+            var mdl = File.OpenRead(mdlFilename).Using(Mdl.Read);
+            var submodel = mdl.First();
+
+            return (new MdlComParser(submodel), null);
         }
 
         public static (IModelMotion, IKingdomTexture[]) BBSMeshLoader(GraphicsDevice graphics, string FilePath, IModelMotion Model, IKingdomTexture[] Textures)

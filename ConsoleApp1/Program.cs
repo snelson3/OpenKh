@@ -1,5 +1,6 @@
-﻿using OpenKh.Common;
+using OpenKh.Common;
 using OpenKh.Kh2;
+using OpenKh.Recom;
 using OpenKh.Tools.Common;
 using System;
 using System.Collections.Generic;
@@ -13,29 +14,26 @@ using System.Threading.Tasks;
 namespace ConsoleApp1
 {
 	class Program
-	{
-		static void Main(string[] args)
+    {
+        private const string Input = @"D:\Hacking\KHReCoM\models\ps4_stripped\PL0001.MDL";
+        private const string Output = @"D:\Hacking\KHReCoM\models\ps4\PL0001_mod.MDL";
+
+        static void Main(string[] args)
 		{
-			string OpenKhSolutionDirectory = 
-				Directory.GetParent( /* ConsoleApp1 */
-					Directory.GetParent( /* bin */
-						Directory.GetParent( /* Debug */
-							Directory.GetParent(Directory.GetCurrentDirectory()).FullName).FullName).FullName).FullName;
+            var mdls = File.OpenRead(Input).Using(Mdl.Read);
+            var mdl = mdls.First();
+            foreach (var bone in mdl.Bones)
+                bone.Matrix = System.Numerics.Matrix4x4.Identity;
+            mdl.Meshes2 = null;
+            mdl.Meshes = mdl.Meshes.Take(10).ToList();
 
-			if (!Directory.Exists(OpenKhSolutionDirectory + @"\OpenKh.Tests"))
-				return;
-			Directory.SetCurrentDirectory(OpenKhSolutionDirectory + @"\OpenKh.Tests");
-
-
-			var process = ProcessStream.TryGetProcess(x => x.ProcessName == "pcsx2"); /* For RAM-related tests. */
-			using var stream = new ProcessStream(process, 0x20000000, 0x2000000);
-
-			//stream.Position = 0x00964c10;
-			//var dpd = new OpenKh.Kh2.Dpd(stream);
-			//var dpd = new OpenKh.Kh2.Dpd(File.OpenRead(@"D:\Hacking\KH2\reverse\SAMPLES\tt_0.dpd"));
-			//var dpd = new OpenKh.Kh2.Dpd(File.OpenRead(@"D:\Hacking\KH2\reverse\SAMPLES\texcommon.dpd"));
-
-
+            File.Create(Output).Using(x =>
+            {
+                x.Position = 0x10;
+                Mdl.Write(x, mdls);
+                x.Position = 0;
+                x.Write(x.Length);
+            });
 		}
 	}
 }
