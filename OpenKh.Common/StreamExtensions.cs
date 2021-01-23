@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using Xe.BinaryMapper;
 
@@ -131,6 +132,27 @@ namespace OpenKh.Common
             return encoding.GetString(data, 0, terminatorIndex < 0 ? maxLength : terminatorIndex);
         }
 
+        public static Matrix4x4 ReadMatrix4x4(this Stream stream)
+        {
+            return new Matrix4x4(
+                stream.ReadSingle(),
+                stream.ReadSingle(),
+                stream.ReadSingle(),
+                stream.ReadSingle(),
+                stream.ReadSingle(),
+                stream.ReadSingle(),
+                stream.ReadSingle(),
+                stream.ReadSingle(),
+                stream.ReadSingle(),
+                stream.ReadSingle(),
+                stream.ReadSingle(),
+                stream.ReadSingle(),
+                stream.ReadSingle(),
+                stream.ReadSingle(),
+                stream.ReadSingle(),
+                stream.ReadSingle());
+        }
+
         public static int WriteList<T>(this Stream stream, IEnumerable<T> items)
             where T : class
         {
@@ -174,6 +196,26 @@ namespace OpenKh.Common
         public static void Write(this Stream stream, long value) => new BinaryWriter(stream).Write(value);
         public static void Write(this Stream stream, ulong value) => new BinaryWriter(stream).Write(value);
         public static void Write(this Stream stream, float value) => new BinaryWriter(stream).Write(value);
+
+        public static void Write(this Stream stream, ref Matrix4x4 matrix)
+        {
+            stream.Write(matrix.M11);
+            stream.Write(matrix.M12);
+            stream.Write(matrix.M13);
+            stream.Write(matrix.M14);
+            stream.Write(matrix.M21);
+            stream.Write(matrix.M22);
+            stream.Write(matrix.M23);
+            stream.Write(matrix.M24);
+            stream.Write(matrix.M31);
+            stream.Write(matrix.M32);
+            stream.Write(matrix.M33);
+            stream.Write(matrix.M34);
+            stream.Write(matrix.M41);
+            stream.Write(matrix.M42);
+            stream.Write(matrix.M43);
+            stream.Write(matrix.M44);
+        }
 
         public static void Copy(this Stream source, Stream destination, int length, int bufferSize = 65536)
         {
