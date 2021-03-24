@@ -292,11 +292,8 @@ namespace OpenKh.Patcher
             if (!File.Exists(srcFile))
                 throw new FileNotFoundException($"The mod does not contain the file {assetFile.Source[0].Name}", srcFile);
 
-            var scripts = Kh2.Ard.SpawnPoint.IsValid(stream) ?
-                Kh2.Ard.SpawnPoint.Read(stream).ToDictionary(x => x.Id, x => x) :
-                new Dictionary<short, Kh2.Ard.SpawnPoint>();
             var spawnPoint = Helpers.YamlDeserialize<List<Kh2.Ard.SpawnPoint>>(File.ReadAllText(srcFile));
-            
+
             Kh2.Ard.SpawnPoint.Write(stream.SetPosition(0), spawnPoint);
         }
     }
